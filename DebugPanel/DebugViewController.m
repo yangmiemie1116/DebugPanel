@@ -2,7 +2,7 @@
 //  DebugViewController.m
 //  DebugPanel
 //
-//  Created by 杨志强 on 2017/8/21.
+//  Created by sheep on 2017/8/21.
 //  Copyright © 2017年 sheep. All rights reserved.
 //
 
@@ -11,6 +11,7 @@
 @property (nonatomic, strong) UITextField *onlineTextField;
 @property (nonatomic, strong) UITextField *offlineTextField;
 @property (nonatomic, strong) UITextField *readyTextField;
+@property (nonatomic, strong) UILabel *toastLab;
 @end
 
 @implementation DebugViewController
@@ -18,8 +19,14 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.title = @"切换环境";
-    UILabel *onlineLab = [UILabel new];
     self.view.backgroundColor = [UIColor whiteColor];
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"关闭" style:UIBarButtonItemStylePlain target:self action:@selector(closeButtonDown)];
+    [self p_setupTextField];
+    [self p_setupToast];
+}
+
+- (void)p_setupTextField {
+    UILabel *onlineLab = [UILabel new];
     onlineLab.text = @"生产环境";
     onlineLab.frame = CGRectMake(10, 80, 80, 30);
     onlineLab.textColor = [UIColor blackColor];
@@ -32,6 +39,7 @@
     self.onlineTextField.font = [UIFont systemFontOfSize:16];
     self.onlineTextField.textColor = [UIColor blackColor];
     self.onlineTextField.layer.borderWidth = 1.0;
+    self.onlineTextField.text = self.onlineDomain;
     self.onlineTextField.layer.borderColor = [UIColor lightGrayColor].CGColor;
     [self.view addSubview:self.onlineTextField];
     
@@ -48,6 +56,7 @@
     self.offlineTextField.textColor = [UIColor blackColor];
     self.offlineTextField.layer.borderWidth = 1.0;
     self.offlineTextField.layer.borderColor = [UIColor lightGrayColor].CGColor;
+    self.offlineTextField.text = self.offlineDomain;
     [self.view addSubview:self.offlineTextField];
     
     UILabel *readyLab = [UILabel new];
@@ -62,6 +71,7 @@
     self.readyTextField.font = [UIFont systemFontOfSize:16];
     self.readyTextField.textColor = [UIColor blackColor];
     self.readyTextField.layer.borderWidth = 1.0;
+    self.readyTextField.text = self.readyDomain;
     self.readyTextField.layer.borderColor = [UIColor lightGrayColor].CGColor;
     [self.view addSubview:self.readyTextField];
     
@@ -89,8 +99,20 @@
     [readyButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     [self.view addSubview:readyButton];
     [readyButton addTarget:self action:@selector(readyButtonDown) forControlEvents:UIControlEventTouchUpInside];
-    
-    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"关闭" style:UIBarButtonItemStylePlain target:self action:@selector(closeButtonDown)];
+}
+
+- (void)p_setupToast {
+    self.toastLab = [UILabel new];
+    self.toastLab.text = @"切换成功";
+    self.toastLab.font = [UIFont systemFontOfSize:15];
+    self.toastLab.textColor = [UIColor blackColor];
+    [self.view addSubview:self.toastLab];
+    self.toastLab.backgroundColor = [UIColor grayColor];
+    self.toastLab.layer.masksToBounds = YES;
+    self.toastLab.layer.cornerRadius = 6.0;
+    self.toastLab.textAlignment = NSTextAlignmentCenter;
+    self.toastLab.frame = CGRectMake(self.view.frame.size.width/2-50, self.view.frame.size.height-100, 100, 30);
+    self.toastLab.alpha = 0;
 }
 
 - (void)closeButtonDown {
@@ -101,21 +123,31 @@
 }
 
 - (void)onlineButtonDown {
-    if (self.onlineBlock) {
-        self.onlineBlock(self.onlineTextField.text);
+    [self toast];
+    if (self.httpChanged) {
+        self.httpChanged([self.onlineTextField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]);
     }
 }
 
 - (void)offlineButtonDown {
-    if (self.offlineBlock) {
-        self.offlineBlock(self.offlineTextField.text);
+    [self toast];
+    if (self.httpChanged) {
+        self.httpChanged([self.offlineTextField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]);
     }
 }
 
 - (void)readyButtonDown {
-    if (self.readyBlock) {
-        self.readyBlock(self.readyTextField.text);
+    [self toast];
+    if (self.httpChanged) {
+        self.httpChanged([self.readyTextField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]);
     }
+}
+
+- (void)toast {
+    self.toastLab.alpha = 1.0;
+    [UIView animateWithDuration:0.3 delay:1.2 options:UIViewAnimationOptionCurveLinear animations:^{
+        self.toastLab.alpha = 0;
+    } completion:nil];
 }
 
 - (void)didReceiveMemoryWarning {
