@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "DebugPanel"
-  s.version      = "0.0.1"
+  s.version      = "0.0.2"
   s.summary      = "切换线上线下环境的调试面板"
   s.description  = <<-DESC
                    切换线上线下环境的调试面板

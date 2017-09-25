@@ -78,6 +78,28 @@ static NSInteger PanelWidth = 50;
     [[UIApplication sharedApplication].keyWindow addGestureRecognizer:tapWindow];
 }
 
+- (UIViewController *)topViewController {
+    return [self p_topViewControllerWithRootViewController:[UIApplication sharedApplication].keyWindow.rootViewController];
+}
+
+- (UIViewController*)p_topViewControllerWithRootViewController:(UIViewController*)rootViewController {
+    if ([rootViewController isKindOfClass:[UITabBarController class]]) {
+        UITabBarController* tabBarController = (UITabBarController*)rootViewController;
+        return [self p_topViewControllerWithRootViewController:tabBarController.selectedViewController];
+    } else if ([rootViewController isKindOfClass:[UINavigationController class]]) {
+        UINavigationController* navigationController = (UINavigationController*)rootViewController;
+        return [self p_topViewControllerWithRootViewController:navigationController.topViewController];
+    } else if (rootViewController.presentedViewController) {
+        UIViewController* presentedViewController = rootViewController.presentedViewController;
+        return [self p_topViewControllerWithRootViewController:presentedViewController];
+    } else {
+        if ([rootViewController.parentViewController isKindOfClass:[UINavigationController class]]) {
+            return rootViewController;
+        }
+        return nil;
+    }
+}
+
 - (void)tapWindowGes {
     [[UIApplication sharedApplication].keyWindow bringSubviewToFront:self.debugView];
 }
@@ -99,7 +121,7 @@ static NSInteger PanelWidth = 50;
         }
     };
     UINavigationController *naviCtr = [[UINavigationController alloc] initWithRootViewController:debugCtr];
-    [[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:naviCtr animated:YES completion:nil];
+    [[self topViewController] presentViewController:naviCtr animated:YES completion:nil];
 }
 
 - (void)panGes:(UIPanGestureRecognizer*)ges {
